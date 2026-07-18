@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理 - 教务管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+        .nav {
+            background: #667eea;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .nav a { color: white; text-decoration: none; }
+        .nav .logo { font-size: 20px; font-weight: bold; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .toolbar input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-danger { background: #f56c6c; color: white; }
+        .btn-search { background: #67c23a; color: white; }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        .flash {
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .flash.success { background: #f0f9eb; color: #67c23a; border: 1px solid #e1f3d8; }
+        .flash.error { background: #fef0f0; color: #f56c6c; border: 1px solid #fde2e2; }
+        .modal-form { display: none; }
+        .add-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .add-form h3 { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-row input { flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/" class="logo">📚 教务管理系统</a>
+        <a href="/students">学生管理</a>
+        <a href="/courses">课程管理</a>
+        <a href="/grades">成绩管理</a>
+        <a href="/logout" style="margin-left: auto;">退出登录</a>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="flash {{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <h2 style="margin-bottom: 20px;">👨‍🎓 学生信息管理</h2>
+
+        <div class="add-form">
+            <h3>➕ 添加学生</h3>
+            <form action="/student/add" method="POST">
+                <div class="form-row">
+                    <input type="text" name="stu_id" placeholder="学号 *" required>
+                    <input type="text" name="name" placeholder="姓名 *" required>
+                    <input type="text" name="gender" placeholder="性别">
+                    <input type="text" name="age" placeholder="年龄">
+                </div>
+                <div class="form-row">
+                    <input type="text" name="major" placeholder="专业">
+                    <input type="text" name="class_name" placeholder="班级">
+                    <input type="text" name="phone" placeholder="联系电话">
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="toolbar">
+            <form method="GET" style="display: flex; gap: 10px;">
+                <input type="text" name="keyword" value="{{ keyword }}" placeholder="搜索学号或姓名">
+                <button type="submit" class="btn btn-search">搜索</button>
+            </form>
+            <span>共 {{ students|length }} 名学生</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>专业</th>
+                    <th>班级</th>
+                    <th>电话</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stu in students %}
+                <tr>
+                    <td>{{ stu.stu_id }}</td>
+                    <td>{{ stu.name }}</td>
+                    <td>{{ stu.gender or '—' }}</td>
+                    <td>{{ stu.age or '—' }}</td>
+                    <td>{{ stu.major or '—' }}</td>
+                    <td>{{ stu.class_name or '—' }}</td>
+                    <td>{{ stu.phone or '—' }}</td>
+                    <td>
+                        <a href="/student/edit/{{ stu.stu_id }}" class="btn" style="background:#e6a23c; color:white;">编辑</a>
+                        <a href="/student/delete/{{ stu.stu_id }}" class="btn btn-danger" onclick="return confirm('确认删除？')">删除</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" style="text-align: center; color: #999;">暂无数据</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

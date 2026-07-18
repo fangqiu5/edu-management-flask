@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩管理 - 教务管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+        .nav {
+            background: #667eea;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .nav a { color: white; text-decoration: none; }
+        .nav .logo { font-size: 20px; font-weight: bold; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; }
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            text-decoration: none;
+            color: #666;
+        }
+        .tab.active { background: #667eea; color: white; }
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 0 8px 8px 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .toolbar input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-danger { background: #f56c6c; color: white; }
+        .btn-search { background: #67c23a; color: white; }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        .score-high { color: #67c23a; font-weight: bold; }
+        .score-low { color: #f56c6c; font-weight: bold; }
+        .flash {
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .flash.success { background: #f0f9eb; color: #67c23a; border: 1px solid #e1f3d8; }
+        .flash.error { background: #fef0f0; color: #f56c6c; border: 1px solid #fde2e2; }
+        .add-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .add-form h3 { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-row input { flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/" class="logo">📚 教务管理系统</a>
+        <a href="/students">学生管理</a>
+        <a href="/courses">课程管理</a>
+        <a href="/grades">成绩管理</a>
+        <a href="/logout" style="margin-left: auto;">退出登录</a>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="flash {{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <h2 style="margin-bottom: 20px;">📝 成绩管理</h2>
+
+        <div class="add-form">
+            <h3>➕ 录入成绩</h3>
+            <form action="/grade/add" method="POST">
+                <div class="form-row">
+                    <input type="text" name="stu_id" placeholder="学号 *" required>
+                    <input type="text" name="course_id" placeholder="课程号 *" required>
+                    <input type="text" name="score" placeholder="成绩">
+                    <button type="submit" class="btn btn-primary">录入</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tabs">
+            <a href="/grades?view=student&keyword={{ keyword }}" class="tab {{ 'active' if view == 'student' }}">按学生查询</a>
+            <a href="/grades?view=course&keyword={{ keyword }}" class="tab {{ 'active' if view == 'course' }}">按课程查询</a>
+        </div>
+
+        <div class="toolbar">
+            <form method="GET" style="display: flex; gap: 10px;">
+                <input type="hidden" name="view" value="{{ view }}">
+                <input type="text" name="keyword" value="{{ keyword }}"
+                       placeholder="{{ '输入学号或姓名' if view == 'student' else '输入课程号或课程名' }}">
+                <button type="submit" class="btn btn-search">查询</button>
+            </form>
+            <span>共 {{ grades|length }} 条记录</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>课程号</th>
+                    <th>课程名</th>
+                    <th>成绩</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in grades %}
+                <tr>
+                    <td>{{ g.stu_id }}</td>
+                    <td>{{ g.stu_name }}</td>
+                    <td>{{ g.course_id }}</td>
+                    <td>{{ g.course_name }}</td>
+                    <td>
+                        {% if g.score is not none %}
+                            <span class="{{ 'score-high' if g.score >= 90 else 'score-low' if g.score < 60 else '' }}">
+                                {{ g.score }}
+                            </span>
+                        {% else %}
+                            未录入
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/grade/edit/{{ g.id }}" class="btn" style="background:#e6a23c; color:white;">编辑</a>
+                        <a href="/grade/delete/{{ g.id }}" class="btn btn-danger" onclick="return confirm('确认删除？')">删除</a>
+                    </td>
+
+                </tr>
+                {% else %}
+                <tr><td colspan="6" style="text-align: center; color: #999;">输入关键字查询成绩</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

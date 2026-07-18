@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑成绩 - 教务管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+        .nav {
+            background: #667eea;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .nav a { color: white; text-decoration: none; }
+        .nav .logo { font-size: 20px; font-weight: bold; }
+        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .card h2 { margin-bottom: 20px; color: #333; }
+        .info-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            color: #666;
+        }
+        .info-row span { color: #333; font-weight: 500; }
+        .form-group { margin: 20px 0; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn-row { display: flex; gap: 10px; margin-top: 25px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-default { background: #909399; color: white; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/" class="logo">📚 教务管理系统</a>
+        <a href="/students">学生管理</a>
+        <a href="/courses">课程管理</a>
+        <a href="/grades">成绩管理</a>
+        <a href="/logout" style="margin-left: auto;">退出登录</a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>✏️ 修改成绩</h2>
+            <div class="info-row">学号：<span>{{ grade.stu_id }}</span></div>
+            <div class="info-row">姓名：<span>{{ grade.stu_name }}</span></div>
+            <div class="info-row">课程：<span>{{ grade.course_name }}</span></div>
+            <form method="POST">
+                <div class="form-group">
+                    <label>成绩</label>
+                    <input type="text" name="score" value="{{ grade.score if grade.score is not none else '' }}">
+                </div>
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                    <a href="/grades" class="btn btn-default">返回</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
